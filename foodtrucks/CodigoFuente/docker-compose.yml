@@ -1,0 +1,18 @@
+version: '3.7'
+
+services:
+  foodtrucks_app:
+    image: 192.168.5.10:5000/ft_clientapp
+    build: ClientApp
+  foodtrucks_backend:
+    image: 192.168.5.10:5000/ft_rsfoodtrucks
+    build: rsFoodtrucks
+    volumes:
+      - ./openssl.cnf:/etc/ssl/openssl.cnf:ro
+      - ./openssl.cnf:/usr/local/ssl/openssl.cnf:ro
+      - ./openssl.cnf:/usr/lib/ssl/openssl.cnf:ro
+  foodtrucks_proxy:
+    image: 192.168.5.10:5000/ft_proxy
+    build: Proxy
+    ports:
+      - 2121:443

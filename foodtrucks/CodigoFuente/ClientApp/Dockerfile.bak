@@ -1,0 +1,62 @@
+#FROM node:16
+#EXPOSE 3000
+#WORKDIR /saludmgpfront
+#ENV PATH="./node_modules/.bin;$PATH"
+#COPY . .
+#RUN npm config set strict-ssl false
+#RUN npm i
+#RUN npm run build
+#RUN npm i -g serve
+#CMD ["serve","-s","build"]
+
+#----
+
+#FROM node:16 AS build
+#WORKDIR /app
+#COPY . .
+#RUN npm config set strict-ssl false
+#RUN npm i
+#RUN npm run build
+#FROM nginx:alpine
+#COPY --from=build /app/build /usr/share/nginx/html
+#COPY --from=build /app/nginx.conf /etc/nginx/conf.d/default.conf
+#COPY --from=build /app/build /var/www
+#EXPOSE 80
+#ENTRYPOINT ["nginx", "-g", "daemon off;"]
+
+#---
+
+#FROM node:16 as builder
+#RUN mkdir /usr/src/app
+#WORKDIR /usr/src/app
+#ENV PATH /usr/src/app/node_modules/.bin:$PATH
+#COPY package.json /usr/src/app/package.json
+#RUN npm config set strict-ssl false
+#RUN npm install
+#COPY ./package-lock.json /usr/src/app/
+#COPY ./public /usr/src/app/public
+#COPY ./src /usr/src/app/src
+#RUN npm run build
+# production environment
+#FROM nginx:alpine
+#COPY --from=builder /usr/src/app/build /var/www
+#COPY ./nginx.conf /etc/nginx/nginx.conf
+#CMD ["nginx", "-g", "daemon off;"]
+
+#----
+
+FROM node:16
+#EXPOSE 3000
+ENV TZ=America/Argentina/Buenos_Aires
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+RUN mkdir /usr/src/app
+WORKDIR /usr/src/app
+COPY package.json /usr/src/app/package.json
+RUN npm config set strict-ssl false
+RUN npm install --force
+COPY ./package-lock.json /usr/src/app/
+COPY ./public /usr/src/app/public
+COPY ./src /usr/src/app/src
+RUN npm run build
+RUN npm i -g serve
+CMD ["serve","-s","build"]

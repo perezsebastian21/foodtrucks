@@ -1,0 +1,215 @@
+.scroll{
+    overflow-x: auto;
+    width: 98%;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+    margin-top: 20px;
+  }
+.FormularioClient{
+  display: flex;
+  width: 60%;
+  gap: 1;
+align-items: center;
+}
+
+.FormularioFilter{
+  display: flex;
+  align-items: center;
+}
+
+.FormularioFilter div{
+  margin-right: 10px;
+}
+
+.Inputs{
+  margin: 5px;
+}
+.texto{
+  text-align: center;
+}
+  .tabla{
+    border-collapse: collapse;
+    width: 100%;
+  }
+  
+  .tableHead{ 
+    background-color: rgb(0, 166, 203) !important;
+  }
+ .titulos{
+  text-align: center;
+ }
+
+ .textoModal{
+  margin-top: 10%;
+  color: black !important;
+  }
+
+  .prueba{
+    word-break: break-all;
+    width: 80%;
+  }
+
+  .tableHead tr th{
+    color: white !important;
+    border-right: 0px;
+    border-left: 0px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    padding-left: 5px;
+  }
+  
+  table tbody tr:hover{
+    background-color: rgba(0, 179, 219, 0.473);
+  }
+  
+  table tbody tr td{
+    padding: 10px;
+    border-bottom: 1px solid rgba(224, 224, 224, 0.404);
+  
+  }
+  .rowContenido{
+    display: flex;
+  }
+
+  
+  .contenedor{
+    max-width: max-content;
+    white-space: nowrap !important;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .datosTexto{
+    color: rgb(156, 156, 156);
+    padding: 5px;
+  }
+  .botonExpand{
+    border: none;
+    color: white;
+    border-radius: 5px;
+    padding: 5px;
+    background-color: #24436f;
+    width: max-content;
+  }    
+  
+  .expand{
+    background-color: rgba(231, 231, 231, 0.705);
+    width: 20px;
+  }
+  
+  form button.error{
+    visibility:hidden;
+  }
+  form button.success{
+    margin: 5px !important;
+  }
+
+  hr {
+    border: 0;
+    border-bottom: 2px solid #333;
+    height:0;
+    }
+  
+.cardHorizontal{
+  box-shadow: 6px 9px 12px -4px rgba(0,0,0,0.4);
+-webkit-box-shadow: 6px 9px 12px -4px rgba(0,0,0,0.4);
+-moz-box-shadow: 6px 9px 12px -4px rgba(0,0,0,0.4);
+  display: flex;
+  flex-direction: row;
+  margin-top: 10px;
+
+}
+.cardHorizontal img{
+  
+width: 25%;
+
+}
+.cardBody {
+  background-color: #c4c4c44f;
+display: flex; 
+    flex-direction: column !important;
+    align-items: stretch !important;
+    width: 100% !important;
+    justify-content: space-around !important;
+    } 
+    
+  .input:focus{
+    outline: none;
+  }
+  
+      
+  p.error{
+    color: rgb(207, 0, 0);
+    font-size: 13px;
+    text-align: center;
+  }
+      
+  p.success{
+    visibility: hidden;
+  }
+  
+
+  
+ 
+  .contenido{
+    width: 100%;
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+   } 
+  
+   .espacio{
+    padding-top: 15px;
+  }
+  
+  .pagination-link.is-current {
+    background-color: rgb(0, 182, 223) !important;
+    border-color: rgb(0, 166, 203) !important;
+  }
+ 
+  .head{
+    width: 100%;
+    background-color: #6F7075 !important;
+  }
+  
+  .backHead{
+    background-color: #6F7075 !important;
+    padding-top: 10px;
+    padding-right: 21px;
+    padding-bottom: 3px;
+    padding-left: 21px;
+  }
+  
+  .backHead h2{
+    color: white !important;
+    font-size: 1.3rem !important;
+  }
+
+  .modal-header{
+    background-color: #24436f !important;
+    color: white;
+  }
+
+  /*-----------------------------------------------------------------------------------------------------------------------*/
+  @media (max-width: 600px) {
+  
+    .Formulario{
+    display: flex;
+    flex-direction: column;
+  }
+
+  .FormularioClient{
+    width: 100% !important;
+    align-items: center;
+    flex-direction: row;
+}
+
+ 
+  form button.success{
+    margin: 5px !important;
+    width: 100%;
+  }
+.Inputs{
+  width: 100%;
+}
+
+  }

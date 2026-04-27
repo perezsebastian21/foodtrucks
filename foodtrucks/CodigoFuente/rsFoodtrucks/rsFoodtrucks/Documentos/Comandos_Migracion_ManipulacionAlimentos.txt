@@ -1,0 +1,7 @@
+Dado que se ha modificado el modelo en C# (FT_Foodtrucks), puedes generar la migración y aplicarla a tu base de datos automáticamente con Entity Framework Core ejecutando los siguientes comandos en tu terminal (desde la carpeta rsFoodtrucks donde está el archivo .csproj):
+
+1. Generar la clase de migración (añadirá los archivos a tu carpeta /Migrations):
+   dotnet ef migrations add AddFieldManipulacionAlimentos
+
+2. Aplicar la migración generada a la base de datos (PostgreSQL):
+   dotnet ef database update

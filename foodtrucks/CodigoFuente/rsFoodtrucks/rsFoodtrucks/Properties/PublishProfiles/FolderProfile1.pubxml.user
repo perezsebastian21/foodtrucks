@@ -1,0 +1,10 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!--
+https://go.microsoft.com/fwlink/?LinkID=208121. 
+-->
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <_PublishTargetUrl>C:\DesarrolloGIT\foodtrucks\DEPLOY\publish</_PublishTargetUrl>
+    <History>True|2023-09-28T12:21:37.4097519Z;True|2023-09-28T09:11:17.4884674-03:00;</History>
+  </PropertyGroup>
+</Project>

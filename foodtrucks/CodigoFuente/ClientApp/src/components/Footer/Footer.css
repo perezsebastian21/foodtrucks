@@ -1,0 +1,22 @@
+h3{
+    font-family: 'Museo-Sans-900' !important;
+    font-size: .9em !important;
+    margin-bottom: 1em !important;
+    font-weight: bold !important;
+    margin-top: 2rem !important;
+}
+
+.bg-footer{
+    background-color: #24436f !important;
+}
+a:hover{
+    color: #6F7075;
+}
+
+.menu-social ul li {
+    display: inline !important;
+    font-size: 2em !important;
+}
+.footerImagen{
+    width: 60%;
+}

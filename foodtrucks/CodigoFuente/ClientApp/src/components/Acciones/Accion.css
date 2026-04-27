@@ -1,0 +1,19 @@
+.sectionForm{
+    display: inline-flex;
+    gap: 10px;
+}
+
+.formADM{
+    display: flex;
+    flex-direction: column;
+}
+
+.campoForm{
+    width: 100%;
+}
+
+.formLabelADM{
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}

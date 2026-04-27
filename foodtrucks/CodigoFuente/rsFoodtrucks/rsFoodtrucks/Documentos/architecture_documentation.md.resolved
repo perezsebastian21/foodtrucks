@@ -1,0 +1,398 @@
+# 📐 Documentación de Arquitectura — rsFoodtrucks
+
+## 1. Resumen General
+
+**rsFoodtrucks** es una Web API REST desarrollada en **ASP.NET Core 3.1** que gestiona un registro de food trucks (camiones de comida) para el dominio del Municipio de General Pueyrredón (Mar del Plata). La API provee operaciones CRUD, búsqueda paginada, exportación Excel y autenticación LDAP con tokens JWT.
+
+| Aspecto | Detalle |
+|---|---|
+| **Framework** | ASP.NET Core 3.1 |
+| **Base de datos** | PostgreSQL (Npgsql) |
+| **ORM** | Entity Framework Core 3.1 (Lazy Loading Proxies) |
+| **Autenticación** | LDAP + JWT Bearer |
+| **Serialización** | Newtonsoft.Json |
+| **Mapeo DTO** | AutoMapper 12 + Servicio genérico de imágenes |
+| **Exportación** | EPPlus (Excel) |
+| **Deploy** | Docker (Linux container) |
+
+---
+
+## 2. Arquitectura por Capas
+
+El proyecto sigue una **arquitectura en capas (N-Layer)** con separación clara de responsabilidades:
+
+```mermaid
+graph TB
+    Client["🌐 Cliente HTTP"]
+    
+    subgraph "API Layer"
+        MW["GlobalErrorHandlingMiddleware"]
+        AC["AccountController"]
+        FC["FoodtruckController"]
+        CC["CategoriaController"]
+        UC["UsuarioController"]
+    end
+    
+    subgraph "Service Layer"
+        FS["FoodtruckService"]
+        CS["CategoriaService"]
+        US["UsuarioService"]
+        IMS["GenericImageMapperService"]
+        AM["AutoMapper"]
+    end
+    
+    subgraph "Data Access Layer"
+        REPO["RepositoryAsync&lt;T&gt;"]
+        CTX["ApplicationDbContext"]
+    end
+    
+    subgraph "Infrastructure"
+        PG["PostgreSQL"]
+        LDAP["LDAP Server"]
+    end
+    
+    Client --> MW --> AC & FC & CC & UC
+    FC --> FS & AM & IMS
+    CC --> CS
+    UC --> US
+    AC -->|"Autenticación"| LDAP
+    AC --> US
+    FS & CS & US --> REPO
+    REPO --> CTX --> PG
+```
+
+---
+
+## 3. Estructura de Carpetas
+
+```
+rsFoodtrucks/
+├── Controllers/           ← Endpoints de la API
+│   ├── AccountController.cs       (Login LDAP + JWT)
+│   ├── FoodtruckController.cs     (CRUD + exportación + búsqueda)
+│   ├── CategoriaController.cs     (CRUD categorías)
+│   └── UsuarioController.cs       (CRUD usuarios)
+├── Services/              ← Lógica de negocio
+│   ├── FoodtruckService/
+│   │   ├── IFoodtruckService.cs
+│   │   └── FoodtruckService.cs
+│   ├── CategoriaService/
+│   │   ├── ICategoriaService.cs
+│   │   └── CategoriaService.cs
+│   └── UsuarioService/
+│       ├── IUsuarioService.cs
+│       └── UsuarioService.cs
+├── DataAccess/            ← Patrón Repositorio Genérico
+│   ├── Interfaces/
+│   │   └── IRepositoryAsync.cs
+│   └── Servicios/
+│       └── RepositoryAsync.cs
+├── Models/                ← Entidades EF Core + modelos auxiliares
+│   ├── ApplicationDbContext.cs
+│   ├── FT_Foodtrucks.cs
+│   ├── FT_Categorias.cs
+│   ├── FT_Usuarios.cs
+│   ├── FT_FoodtruckFT_Categoria.cs  (tabla pivote N:N)
+│   ├── QueryParams.cs
+│   ├── ServiceResponse.cs
+│   ├── PagedResponse.cs
+│   └── PageInfo.cs
+├── DTOs/
+│   └── FT_FoodtrucksDTO.cs         (DTO con IFormFile para uploads)
+├── Mapping/
+│   ├── AutoMapperProfiles/
+│   │   └── FoodtruckProfile.cs     (DTO → Entidad)
+│   └── ImageMapping/
+│       ├── IGenericImageMapperService.cs
+│       ├── GenericImageMapperService.cs
+│       └── FormFileConverter.cs
+├── Exceptions/            ← Excepciones personalizadas
+│   ├── BadRequestException.cs
+│   ├── KeyNotFoundException.cs
+│   ├── NotFoundException.cs
+│   ├── NotImplementedException.cs
+│   └── UnauthorizedAccessException.cs
+├── Utility/               ← Utilidades transversales
+│   ├── GlobalErrorHandlingMiddleware.cs
+│   ├── LdapManager.cs
+│   ├── ImageTools.cs
+│   └── ByteArrayInputFormatter.cs
+├── Migrations/            ← Migraciones EF Core
+├── Startup.cs             ← Configuración DI + Pipeline
+├── Program.cs             ← Entry point
+├── appsettings.json       ← Configuración (ConnectionStrings, LDAP)
+├── Dockerfile             ← Build multi-stage para Linux
+└── rsFoodtrucks.csproj    ← Dependencias NuGet
+```
+
+---
+
+## 4. Modelo de Datos (Entidades)
+
+```mermaid
+erDiagram
+    FT_Foodtrucks ||--o{ FT_FoodtruckFT_Categoria : "tiene"
+    FT_Categorias ||--o{ FT_FoodtruckFT_Categoria : "pertenece"
+    FT_Usuarios {
+        int IdUsuario PK
+        string Usuario
+        string Email
+        bool Activo
+    }
+    FT_Foodtrucks {
+        int IdFT PK
+        string NombreFantasia
+        byte[] Logo
+        string Titular
+        string EmailContacto
+        string Menu
+        string Vegano
+        string Vegetariano
+        string SinTACC
+        string Emplazado
+        string Celiaco
+        string Estado
+        string CelContacto
+        string CuitCuil
+        string DomicilioLegal
+        string Telefono
+        string EmailTitular
+        string NumeroRegistro
+        date FechaVencimiento
+        string SolicitudIngreso
+        string Consumo
+        byte[] CartaMenu
+        byte[] DniFrente
+        byte[] DniDorso
+        byte[] FtFrente
+        byte[] FtTrasera
+        byte[] FtIzquierda
+        byte[] FtDerecha
+        byte[] Habilitacion
+        byte[] ManipulacionAlimentos
+    }
+    FT_Categorias {
+        int IdCategoria PK
+        string Nombre
+    }
+    FT_FoodtruckFT_Categoria {
+        int Id PK
+        int IdFT FK
+        int IdCategoria FK
+    }
+```
+
+> La relación **Foodtruck ↔ Categoría** es **muchos a muchos**, resuelta mediante la tabla pivote [FT_FoodtruckFT_Categoria](file:///c:/DesarrolloGIT/foodtrucks/CodigoFuente/rsFoodtrucks/rsFoodtrucks/Models/FT_FoodtruckFT_Categoria.cs#7-9) con cascade delete en ambas FK.
+
+---
+
+## 5. Capas en Detalle
+
+### 5.1 Controllers (API Layer)
+
+| Controlador | Ruta Base | Auth | Responsabilidad |
+|---|---|---|---|
+| [Account](file:///c:/DesarrolloGIT/foodtrucks/CodigoFuente/rsFoodtrucks/rsFoodtrucks/Controllers/AccountController.cs#19-80) | `/Account` | Anónimo | Login LDAP → genera JWT |
+| [FoodtruckController](file:///c:/DesarrolloGIT/foodtrucks/CodigoFuente/rsFoodtrucks/rsFoodtrucks/Controllers/FoodtruckController.cs#31-38) | `/Foodtruck` | Mixto* | CRUD, búsqueda paginada, export Excel |
+| [CategoriaController](file:///c:/DesarrolloGIT/foodtrucks/CodigoFuente/rsFoodtrucks/rsFoodtrucks/Controllers/CategoriaController.cs#24-29) | `/Categoria` | Mixto* | CRUD categorías, búsqueda paginada |
+| [UsuarioController](file:///c:/DesarrolloGIT/foodtrucks/CodigoFuente/rsFoodtrucks/rsFoodtrucks/Controllers/UsuarioController.cs#13-67) | `/Usuario` | `[Authorize(Roles="Admin")]` | CRUD usuarios del sistema |
+
+*\*Autorización comentada en Foodtruck y Categoría; endpoints `FindQP` y `ExportXLS` marcados `[AllowAnonymous]`.*
+
+#### Endpoints principales de [FoodtruckController](file:///c:/DesarrolloGIT/foodtrucks/CodigoFuente/rsFoodtrucks/rsFoodtrucks/Controllers/FoodtruckController.cs#31-38)
+
+| Método | Ruta | Descripción |
+|---|---|---|
+| `GET` | `/Foodtruck/GetAll` | Lista todos los foodtrucks |
+| `GET` | `/Foodtruck/GetById?IdFT=` | Obtiene por ID |
+| `POST` | `/Foodtruck` | Crea (con `[FromForm]` para multipart) |
+| `PUT` | `/Foodtruck` | Actualiza (con imágenes) |
+| `DELETE` | `/Foodtruck/{IdFT}` | Elimina |
+| `GET` | `/Foodtruck/FindQP` | Búsqueda paginada con [QueryParams](file:///c:/DesarrolloGIT/foodtrucks/CodigoFuente/rsFoodtrucks/rsFoodtrucks/Models/QueryParams.cs#10-22) |
+| `GET` | `/Foodtruck/ExportXLS` | Exporta resultado a Excel |
+
+---
+
+### 5.2 Service Layer
+
+Cada servicio implementa una interfaz (`IXxxService`) e inyecta el repositorio genérico. Responsabilidades:
+
+- **[FoodtruckService](file:///c:/DesarrolloGIT/foodtrucks/CodigoFuente/rsFoodtrucks/rsFoodtrucks/Services/FoodtruckService/FoodtruckService%20.cs#23-29)**: Lógica de CRUD con manejo de transacciones para la actualización de relaciones N:N (categorías). Incluye la validación de que las categorías existan antes de guardar. Método [Update](file:///c:/DesarrolloGIT/foodtrucks/CodigoFuente/rsFoodtrucks/rsFoodtrucks/Controllers/UsuarioController.cs#59-65) usa transacción explícita para sincronizar la tabla pivote.
+- **`CategoriaService`** y **`UsuarioService`**: CRUD estándar delegando al repositorio genérico, con métodos [FindBy](file:///c:/DesarrolloGIT/foodtrucks/CodigoFuente/rsFoodtrucks/rsFoodtrucks/Services/FoodtruckService/FoodtruckService%20.cs#158-171) que construyen expresiones de filtrado dinámicas.
+
+---
+
+### 5.3 Data Access Layer (Repositorio Genérico)
+
+`IRepositoryAsync<T>` define las operaciones:
+
+| Método | Descripción |
+|---|---|
+| [GetAll()](file:///c:/DesarrolloGIT/foodtrucks/CodigoFuente/rsFoodtrucks/rsFoodtrucks/DataAccess/Servicios/RepositoryAsync.cs#36-40) | Lista completa |
+| [GetByID(int?)](file:///c:/DesarrolloGIT/foodtrucks/CodigoFuente/rsFoodtrucks/rsFoodtrucks/Services/FoodtruckService/FoodtruckService%20.cs#36-40) | Buscar por PK |
+| [Insert(T)](file:///c:/DesarrolloGIT/foodtrucks/CodigoFuente/rsFoodtrucks/rsFoodtrucks/DataAccess/Servicios/RepositoryAsync.cs#46-52) / [Add(T)](file:///c:/DesarrolloGIT/foodtrucks/CodigoFuente/rsFoodtrucks/rsFoodtrucks/DataAccess/Servicios/RepositoryAsync.cs#207-212) | Insertar entidad |
+| [Delete(int)](file:///c:/DesarrolloGIT/foodtrucks/CodigoFuente/rsFoodtrucks/rsFoodtrucks/Controllers/CategoriaController.cs#57-62) | Eliminar por ID |
+| [Update(T, params Expression[])](file:///c:/DesarrolloGIT/foodtrucks/CodigoFuente/rsFoodtrucks/rsFoodtrucks/Controllers/UsuarioController.cs#59-65) | Actualizar con includes de navegación |
+| [Find(Expression)](file:///c:/DesarrolloGIT/foodtrucks/CodigoFuente/rsFoodtrucks/rsFoodtrucks/DataAccess/Servicios/RepositoryAsync.cs#115-119) | Buscar por expresión |
+| `GetAllDTO<TResult>(...)` | Consulta con filtro, proyección, ordenamiento y paginación |
+| `GetAllDTO2<TResult>(...)` | Variante con paginación `int?` |
+| [AddWithImage(T)](file:///c:/DesarrolloGIT/foodtrucks/CodigoFuente/rsFoodtrucks/rsFoodtrucks/DataAccess/Servicios/RepositoryAsync.cs#213-249) | Guardar con conversión `IFormFile → byte[]` vía reflexión |
+| [AddWithImageFS(T)](file:///c:/DesarrolloGIT/foodtrucks/CodigoFuente/rsFoodtrucks/rsFoodtrucks/DataAccess/Servicios/RepositoryAsync.cs#250-294) | Guardar imagen en filesystem (no productivo) |
+| [Count(Expression)](file:///c:/DesarrolloGIT/foodtrucks/CodigoFuente/rsFoodtrucks/rsFoodtrucks/DataAccess/Servicios/RepositoryAsync.cs#192-205) | Contar registros filtrados |
+
+> [!NOTE]
+> El repositorio utiliza **reflexión** para convertir propiedades `IFormFile` con sufijo `_` a sus correspondientes `byte[]` en la entidad.
+
+---
+
+### 5.4 Mapping
+
+#### AutoMapper ([FoodtruckProfile](file:///c:/DesarrolloGIT/foodtrucks/CodigoFuente/rsFoodtrucks/rsFoodtrucks/Mapping/AutoMapperProfiles/FoodtruckProfile.cs))
+
+Mapea `FT_FoodtrucksDTO → FT_Foodtrucks`:
+- **Ignora** todas las propiedades de imagen (se mapean por separado)
+- En `AfterMap`, convierte `CategoriasIds` (lista de `int`) a objetos [FT_FoodtruckFT_Categoria](file:///c:/DesarrolloGIT/foodtrucks/CodigoFuente/rsFoodtrucks/rsFoodtrucks/Models/FT_FoodtruckFT_Categoria.cs#7-9)
+
+#### GenericImageMapperService
+
+Servicio genérico basado en reflexión que:
+- `MapImagesToEntityAsync`: Convierte `IFormFile` del DTO a `byte[]` en la entidad
+- `MapImagesToDtoAsync`: Dirección inversa (`byte[]` → `IFormFile`)
+
+---
+
+### 5.5 Autenticación y Autorización
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant AccountController
+    participant LdapManager
+    participant LDAP as "LDAP Server"
+    participant UsuarioService
+    participant DB as "PostgreSQL"
+    
+    Client->>AccountController: POST /Account/Login {Usuario, Password}
+    AccountController->>LdapManager: Validate(user, password)
+    LdapManager->>LDAP: Bind (cn=user, CN=Users, dc=mardelplata, dc=gov, dc=ar)
+    LDAP-->>LdapManager: bound=true/false
+    LdapManager-->>AccountController: isValid
+    AccountController->>UsuarioService: FindBy(user)
+    UsuarioService->>DB: SELECT FROM FT_Usuarios
+    DB-->>UsuarioService: lista usuarios
+    UsuarioService-->>AccountController: usuarios
+    AccountController-->>Client: JWT Token (1h, Role=Admin, HMAC-SHA256)
+```
+
+- **LDAP**: Valida credenciales contra Active Directory (`mardelplata.gov.ar:389`)
+- **JWT**: Token de 1 hora con claim `Role = Admin`, firmado con HMAC-SHA256
+- **Política**: `PoliticaAutorizacion` requiere usuario autenticado
+
+---
+
+### 5.6 Middleware y Cross-Cutting Concerns
+
+#### GlobalErrorHandlingMiddleware
+
+Middleware centralizado que captura excepciones y las mapea a códigos HTTP:
+
+| Excepción | HTTP Status |
+|---|---|
+| `BadRequestException` | 400 |
+| `NotFoundException` | 404 |
+| `NotImplementedException` | 501 |
+| `UnauthorizedAccessException` | 401 |
+| `KeyNotFoundException` | 401 |
+| Otras | 500 |
+
+Retorna JSON con `{ error, stackTrace }`.
+
+---
+
+### 5.7 Modelo de Respuesta Paginada
+
+```mermaid
+classDiagram
+    class ServiceResponse~T~ {
+        +T Data
+        +bool Success
+        +string ErrorMessage
+    }
+    class PagedResponse~T~ {
+        +List~T~ data
+        +int Page
+        +decimal Limit
+        +int TotalRows
+        +int TotalPage
+    }
+    class QueryParams {
+        +int? IdFT
+        +int? IdCategoria
+        +string searchString
+        +string emplazado
+        +string? estado
+        +int? page
+        +int? limit
+        +List~int~? CategoriasIds
+    }
+    ServiceResponse --> PagedResponse : Data
+```
+
+Los endpoints de búsqueda retornan `ServiceResponse<PagedResponse<Object>>`, encapsulando datos paginados con metadatos.
+
+---
+
+## 6. Inyección de Dependencias
+
+Registrada en [Startup.cs](file:///c:/DesarrolloGIT/foodtrucks/CodigoFuente/rsFoodtrucks/rsFoodtrucks/Startup.cs) como **Scoped** (por request):
+
+```
+IFoodtruckService          → FoodtruckService
+IUsuarioService            → UsuarioService
+ICategoriaService          → CategoriaService
+IRepositoryAsync<FT_Foodtrucks>             → RepositoryAsync<FT_Foodtrucks>
+IRepositoryAsync<FT_Usuarios>              → RepositoryAsync<FT_Usuarios>
+IRepositoryAsync<FT_Categorias>            → RepositoryAsync<FT_Categorias>
+IRepositoryAsync<FT_FoodtruckFT_Categoria> → RepositoryAsync<FT_FoodtruckFT_Categoria>
+IGenericImageMapperService → GenericImageMapperService
+AutoMapper                 → via AddAutoMapper()
+ApplicationDbContext       → PostgreSQL (UseLazyLoadingProxies + Npgsql)
+```
+
+---
+
+## 7. Pipeline HTTP
+
+Configurado en `Startup.Configure()`:
+
+```
+Request → GlobalErrorHandlingMiddleware → Authentication → Routing → CORS → Authorization → Endpoints
+```
+
+> [!WARNING]
+> CORS está configurado para aceptar **cualquier origen** (`SetIsOriginAllowed(origin => true)`), lo cual es inseguro para producción.
+
+---
+
+## 8. Deployment (Docker)
+
+Build multi-stage basado en `.NET Core 3.1 SDK` (build) y `ASP.NET Core 3.1 Runtime` (runtime).
+
+- Instala certificados custom (FortiGate) para proxy corporativo
+- Timezone: `America/Argentina/Buenos_Aires`
+- Puertos expuestos: `8080`, `3000`
+- Incluye `mssql-tools` en la imagen final
+
+---
+
+## 9. Dependencias NuGet Principales
+
+| Paquete | Versión | Uso |
+|---|---|---|
+| `Npgsql.EntityFrameworkCore.PostgreSQL` | 3.1.0 | Proveedor EF Core para PostgreSQL |
+| `Microsoft.EntityFrameworkCore.Proxies` | 3.1.32 | Lazy Loading |
+| `Microsoft.AspNetCore.Authentication.JwtBearer` | 3.1.32 | Autenticación JWT |
+| `Novell.Directory.Ldap.NETStandard` | 3.1.0 | Conexión LDAP |
+| `AutoMapper.Extensions.Microsoft.DependencyInjection` | 12.0.0 | Mapeo DTO ↔ Entidad |
+| `EPPlus` | 6.2.4 | Exportación Excel |
+| `Microsoft.AspNetCore.Mvc.NewtonsoftJson` | 3.1.31 | Serialización JSON |

@@ -1,0 +1,1 @@
+los cambios que faltan comitear son debido a que se incluyo el servicereponse y paged response al middleware. No se comiteo pq esos cambios no llegaron a produccion. Cuando se soliciten cambios subir el mismo.

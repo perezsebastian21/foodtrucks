@@ -1,0 +1,110 @@
+using Microsoft.AspNetCore.Mvc;
+using System.Text.Json.Serialization;
+
+var builder = WebApplication.CreateBuilder(args);
+
+// --- CONFIGURACIÓN DE CORS ---
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("PermitirTodo", policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyMethod()
+              .AllowAnyHeader();
+    });
+});
+
+// Configuración para que el JSON sea legible
+builder.Services.Configure<JsonOptions>(options => {
+    options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
+});
+
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
+var app = builder.Build();
+
+// --- ACTIVAR CORS ---
+app.UseCors("PermitirTodo");
+
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
+
+//app.UseHttpsRedirection();
+
+// Almacén en memoria: Clave = Authorization Code
+var MockSessionStore = new Dictionary<string, Dictionary<string, string>>();
+
+// --- 1. ENDPOINT DE AUTORIZACIÓN (GET) ---
+app.MapGet("/connect/authorize", (
+    [FromQuery] string client_id,
+    [FromQuery] string redirect_uri,
+    [FromQuery] string state,
+    [FromQuery] string nonce,
+    [FromQuery] string code_challenge,
+    [FromQuery] string code_challenge_method) =>
+{
+    // El documento de MDQ Digital exige S256 obligatoriamente
+    if (code_challenge_method != "S256")
+        return Results.BadRequest(new { error = "invalid_request", description = "PKCE method S256 required" });
+
+    // Generamos el código de autorización
+    var authCode = "AUTH-" + Guid.NewGuid().ToString("N").Substring(0, 10).ToUpper();
+
+    // Guardamos los datos recibidos para validarlos en el paso del Token
+    MockSessionStore[authCode] = new Dictionary<string, string>
+    {
+        { "state", state },
+        { "nonce", nonce },
+        { "code_challenge", code_challenge },
+        { "redirect_uri", redirect_uri }
+    };
+
+    // Redirección con el código y el estado según la norma
+    var finalRedirect = $"{redirect_uri}?code={authCode}&state={state}";
+    return Results.Redirect(finalRedirect);
+});
+
+// --- 2. ENDPOINT DE TOKEN (POST) ---
+app.MapPost("/connect/token", ([FromForm] string grant_type, [FromForm] string code, [FromForm] string code_verifier, [FromForm] string client_id, [FromForm] string client_secret, [FromForm] string redirect_uri) =>
+{
+    if (!MockSessionStore.TryGetValue(code, out var session))
+        return Results.BadRequest(new { error = "invalid_grant" });
+
+    // Aquí en producción validarías el code_verifier contra el challenge guardado
+
+    // Limpiamos el código ya que es de un solo uso
+    MockSessionStore.Remove(code);
+
+    return Results.Ok(new
+    {
+        access_token = "mock_access_token_12345",
+        token_type = "Bearer",
+        expires_in = 18000,
+        id_token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzZmE4NWY2NC01NzE3LTQ1NjItYjNmYy0yYzk2M2Y2NmFmYTYiLCJub25jZSI6InNpbXVsYWRvIn0.signature"
+    });
+}).DisableAntiforgery();
+
+// --- 3. ENDPOINT USERINFO (GET) ---
+app.MapGet("/connect/userinfo", (HttpRequest request) =>
+{
+    var authHeader = request.Headers.Authorization.ToString();
+    if (string.IsNullOrEmpty(authHeader) || !authHeader.Contains("Bearer mock_access_token_12345"))
+        return Results.Unauthorized();
+
+    return Results.Ok(new
+    {
+        sub = "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+        name = "Juan Pérez",
+        given_name = "Juan",
+        family_name = "Pérez",
+        email = "juan.perez@mardelplata.gob.ar",
+        email_verified = true,
+        cuit = "20445625583"
+    });
+});
+
+app.Run();

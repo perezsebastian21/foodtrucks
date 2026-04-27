@@ -1,0 +1,259 @@
+.scroll{
+  overflow-x: auto;
+  width: 98%;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+  margin-top: 20px;
+}
+
+.Formulario{
+  display: flex;
+  width: 65%;
+}
+.seccionNuevo a {
+text-decoration: none;
+}
+
+.Inputs{
+margin: 5px;
+}
+.imagenCard{  
+max-width: 15rem !important;
+padding-right: 10px;
+}  
+.texto{
+text-align: center;
+}
+.tabla{
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.tableHead{ 
+  background-color:#24436f !important;
+}
+.titulos{
+text-align: center;
+}
+
+.textoModal{
+margin-left: 5px;
+color: black !important;
+
+}
+
+.prueba{
+  word-break: break-all;
+  width: 80%;
+}
+
+.tableHead tr th{
+  color: white !important;
+  border-right: 0px;
+  border-left: 0px;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  padding-left: 5px;
+}
+
+table tbody tr:hover{
+  background-color: rgba(0, 179, 219, 0.473);
+}
+
+table tbody tr td{
+  padding: 10px;
+  border-bottom: 1px solid rgba(224, 224, 224, 0.404);
+
+}
+.rowContenido{
+  display: flex;
+}
+
+
+.contenedor{
+  max-width: max-content;
+  white-space: nowrap !important;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.datosTexto{
+  color: rgb(156, 156, 156);
+  padding: 5px;
+}
+.botonExpand{
+  border: none;
+  color: white;
+  border-radius: 5px;
+  padding: 5px;
+  background-color:#24436f;
+  width: max-content;
+}    
+
+.expand{
+  background-color: rgba(231, 231, 231, 0.705);
+  width: 20px;
+}
+
+form button.error{
+  visibility:hidden;
+}
+form button.success{
+  margin: 5px !important;
+}
+
+hr {
+  border: 0;
+  border-bottom: 2px solid #333;
+  height:0;
+  }
+
+.cardHorizontal{
+box-shadow: 6px 9px 12px -4px rgba(0,0,0,0.4);
+-webkit-box-shadow: 6px 9px 12px -4px rgba(0,0,0,0.4);
+-moz-box-shadow: 6px 9px 12px -4px rgba(0,0,0,0.4);
+display: flex;
+flex-direction: row;
+
+}
+.cardHorizontal img{
+
+width: 25%;
+
+}
+.cardBody {
+background-color: #c4c4c44f;
+display: flex; 
+  flex-direction: column !important;
+  align-items: stretch !important;
+  width: 100% !important;
+  justify-content: space-around !important;
+  } 
+  
+.input:focus{
+  outline: none;
+}
+
+    
+p.error{
+  color: rgb(207, 0, 0);
+  font-size: 13px;
+  text-align: center;
+}
+    
+p.success{
+  visibility: hidden;
+}
+
+
+
+
+.contenido{
+  width: 100%;
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+ } 
+
+.espacio{
+  padding-top: 15px;
+}
+
+.pagination-link.is-current {
+  background-color: rgb(0, 182, 223) !important;
+  border-color: rgb(0, 166, 203) !important;
+}
+
+
+.head{
+  width: 100%;
+  background-color: #6F7075 !important;
+}
+
+.backHead{
+  background-color: #6F7075 !important;
+  padding-top: 10px;
+  padding-right: 21px;
+  padding-bottom: 3px;
+  padding-left: 21px;
+}
+
+.backHead h2{
+  color: white !important;
+  font-size: 1.3rem !important;
+}
+
+.modal-header{
+  background-color:  #24436f !important;
+  color: white;
+}
+.btnAgregar{
+display: flex;
+  align-items: center;
+}
+.seccionNuevo{
+width: 95%;
+display: flex;
+justify-content: flex-end;
+}
+.btnEspacio{
+margin-left: 5px;
+
+}
+
+.display{
+  display: flex;
+  align-items: flex-start;;
+}
+.loader-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+}
+
+.loader {
+  border: 6px solid #f3f3f3;
+  border-top: 6px solid #0fb4b9;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  animation: spin 0.8s linear infinite;
+}
+.carousel-item img {
+  max-height: 300px;
+  object-fit: cover;
+}
+
+.carousel-caption {
+  background: rgba(0,0,0,0.5);
+  padding: 5px;
+  border-radius: 5px;
+}
+.FormularioFilter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: end;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+/*-----------------------------------------------------------------------------------------------------------------------*/
+@media (max-width: 600px) {
+
+  .Formulario{
+  display: flex;
+  flex-direction: column;
+}
+
+form button.success{
+  margin: 5px !important;
+  width: 100%;
+}
+.Inputs{
+width: 100%;
+}
+
+}

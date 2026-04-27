@@ -1,0 +1,24 @@
+.navbar-principal {
+    background-color: #24436f !important;
+  }
+  
+  .fotoMenu {
+    max-height: 50px; /* Ajusta según necesites */
+  }
+  
+  /* Ajustes para móvil */
+  @media (max-width: 991px) {
+    .navFlex {
+      flex-direction: column !important;
+    }
+    
+    .navbar-principal .navbar-brand {
+      margin: 0 auto !important;
+      padding: 10px 0;
+    }
+    
+    .navbar-toggler {
+      order: -1;
+      margin-left: auto;
+    }
+  }

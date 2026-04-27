@@ -1,0 +1,18 @@
+.displayLogin{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 5%;
+}
+
+.formLogIn{
+    width: 50%;
+    display: flex;
+    flex-direction: column;
+}
+
+.logOut{
+    width: 100%;
+    display: flex;
+    flex-direction: row-reverse;
+}

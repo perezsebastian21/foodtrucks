@@ -1,0 +1,53 @@
+#FROM mcr.microsoft.com/dotnet/sdk:6.0.302 AS build
+FROM mcr.microsoft.com/dotnet/core/sdk:3.1 as build
+WORKDIR /
+# Copy the contents of certs directory from the local machine to
+# a new directory certs inside the container
+COPY ./certs/ ./certs/
+WORKDIR ./certs/
+run apt-get install -y ca-certificates
+RUN cp fortigate.crt /usr/local/share/ca-certificates
+run update-ca-certificates
+
+RUN mkdir /source
+#RUN curl -k https://api.nuget.org/v3/index.json >> NuGet.Config 
+# copy csproj and restore as distinct layers
+COPY *.csproj /source
+COPY nuget.config /source
+
+WORKDIR /source
+
+#RUN dotnet restore *.csproj --configfile nuget.config
+
+RUN dotnet restore
+
+# copy everything else and build app
+COPY . /source
+#RUN dotnet publish -c release -o /app --no-restore
+RUN dotnet publish -c release -o /app
+
+WORKDIR /app
+run ls
+
+# final stage/image
+FROM mcr.microsoft.com/dotnet/core/aspnet:3.1
+EXPOSE 8080
+EXPOSE 3000
+RUN apt update && apt install -y curl libgdiplus gnupg && \
+    curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add - && \
+    curl https://packages.microsoft.com/config/ubuntu/20.04/prod.list >> /etc/apt/sources.list && \
+    apt-get update && \
+    ACCEPT_EULA=Y apt-get install -y mssql-tools && \
+    apt-get clean
+
+COPY --from=build /app /App
+
+ENV TZ=America/Argentina/Buenos_Aires
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone 
+
+
+WORKDIR /App
+run ls
+ENTRYPOINT ["dotnet", "rsFoodtrucks.dll"]
+
+
