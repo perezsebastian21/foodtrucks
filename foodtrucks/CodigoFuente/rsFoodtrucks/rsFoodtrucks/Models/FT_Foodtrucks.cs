@@ -41,7 +41,9 @@ namespace rsFoodtrucks.Models
         public byte[]? DniFrente { get; set; }
         public byte[]? DniDorso { get; set; }
         public byte[]? FtFrente { get; set; }
-        public byte[] Habilitacion { get; set; }
+        public byte[]? HabHoja1 { get; set; }
+        public byte[]? HabHoja2 { get; set; }
+        public byte[]? HabHoja3 { get; set; }
         public byte[]? ManipulacionAlimentos { get; set; }
         public byte[]? QrCode { get; set; }
         

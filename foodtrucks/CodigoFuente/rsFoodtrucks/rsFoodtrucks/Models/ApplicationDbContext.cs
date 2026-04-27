@@ -169,8 +169,18 @@ namespace rsFoodtrucks.Models
                     .IsRequired(false);
 
 
-                entity.Property(e => e.Habilitacion)
-                    .HasColumnName("Habilitacion")
+                entity.Property(e => e.HabHoja1)
+                    .HasColumnName("HabHoja1")
+                    .HasColumnType("bytea")
+                    .IsRequired(false);
+
+                entity.Property(e => e.HabHoja2)
+                    .HasColumnName("HabHoja2")
+                    .HasColumnType("bytea")
+                    .IsRequired(false);
+
+                entity.Property(e => e.HabHoja3)
+                    .HasColumnName("HabHoja3")
                     .HasColumnType("bytea")
                     .IsRequired(false);
 

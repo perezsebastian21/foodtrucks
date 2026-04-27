@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -95,6 +95,15 @@ namespace rsFoodtrucks.Mapping.ImageMapping
 
                     if (formFile != null && formFile.Length > 0)
                     {
+                        var extension = System.IO.Path.GetExtension(formFile.FileName).ToLowerInvariant();
+                        var extensionesPermitidas = new[] { ".jpg", ".jpeg", ".png", ".bmp" };
+                        
+                        // Solo permitimos imágenes. Evitamos que se suban PDF u otros formatos que no sean imágenes
+                        if (!extensionesPermitidas.Contains(extension))
+                        {
+                            throw new rsFoodtrucks.Exceptions.BadRequestException($"El archivo {formFile.FileName} en el campo {sourceProp.Name} no tiene un formato permitido. Solo se aceptan imágenes (jpg, jpeg, png, bmp). PDF u otros formatos no están permitidos.");
+                        }
+
                         conversionTasks.Add(Task.Run(async () =>
                         {
                             var bytes = await FormFileConverter.ConvertIFormFileToBytesAsync(formFile);

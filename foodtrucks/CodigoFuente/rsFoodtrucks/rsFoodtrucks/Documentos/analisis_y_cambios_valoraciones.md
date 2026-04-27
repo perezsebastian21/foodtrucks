@@ -491,3 +491,22 @@ Extender el comportamiento de notificación automática y carga de motivos (obse
 - **`Services/FoodtruckService/FoodtruckService .cs`**:
   - Se ajustó el reseteo de la propiedad `Observaciones` durante las ediciones. Si el estado es `"S"` o `"E"`, ya no se vacían las observaciones `(if (foodtruck.Estado != "S" && foodtruck.Estado != "E"))`.
   - Se expandió la validación de envío de e-mail usando interpolación para ajustar dinámicamente tanto la acción como el verbo utilizado en el Asunto y el Cuerpo del correo (informando "suspendido" vs "dado de baja") basado en el código resultante para ese Foodtruck.
+
+---
+
+## 13. Desdoble de Habilitación en 3 Hojas y Validación de Imágenes
+
+### Objetivo
+Reemplazar el campo único `Habilitacion` (que guarda un archivo) por tres campos separados: `HabHoja1`, `HabHoja2`, y `HabHoja3` para permitir que el contribuyente suba la habilitación en múltiples partes. Además, se requiere validar estrictamente que estos archivos sean imágenes (`jpg`, `jpeg`, `png`, `bmp`), denegando la subida de documentos PDF u otros formatos de manera explícita para asegurar que el componente que las lee siempre trabaje con datos gráficos.
+
+### Cambios Aplicados
+- **Base de Datos y Modelos (`ApplicationDbContext.cs`, `FT_Foodtrucks.cs`, `FT_FoodtrucksDTO.cs`)**:
+  - Se eliminó la columna `Habilitacion` y se agregaron las tres nuevas columnas con nombre `HabHoja1`, `HabHoja2`, y `HabHoja3` configuradas como `bytea` nullable.
+  - Se crearon los mismos campos en el DTO como objetos `IFormFile`.
+  - Se generó el script `Documentos/Script_Migracion_Habilitacion.sql` para aplicar estos cambios estructurales directamente en PostgreSQL.
+- **AutoMapper (`FoodtruckProfile.cs`)**:
+  - Se configuró a la librería para ignorar el mapeo automático de estos 3 nuevos campos, delegando esta tarea a la clase que gestiona las imágenes a través de reflexion.
+- **Validación de Tipo de Imagen (`GenericImageMapperService.cs`)**:
+  - Respetando la arquitectura (cuyas validaciones de reglas de negocio que interrumpen flujos no deben pertenecer a los Controladores), la validación de formatos se inyectó directamente en el bucle principal de reflexión `MapImagesToEntityAsync` de este servicio genérico.
+  - Al procesar cualquier `IFormFile`, ahora se verifica que la extensión sea explícitamente imagen. Si se detecta un archivo PDF o no soportado, se lanza instantáneamente un `rsFoodtrucks.Exceptions.BadRequestException` informando el error de forma legible (ej. *"El archivo documento.pdf en el campo HabHoja1 no tiene un formato permitido..."*).
+  - Al arrojar el error `BadRequestException` en la capa de Servicio, el `GlobalErrorHandlingMiddleware` existente lo intercepta y responde a los clientes con un **HTTP 400 Bad Request**, abortando tanto la conversión binaria de los restantes archivos como su inserción en la base de datos sin sobrecargar de verificaciones a la capa API.

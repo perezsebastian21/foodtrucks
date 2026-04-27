@@ -18,7 +18,9 @@ namespace rsFoodtrucks.Mapping.AutoMapperProfiles
                 .ForMember(dest => dest.DniFrente, opt => opt.Ignore())
                 .ForMember(dest => dest.DniDorso, opt => opt.Ignore())
                 .ForMember(dest => dest.FtFrente, opt => opt.Ignore())
-                .ForMember(dest => dest.Habilitacion, opt => opt.Ignore())
+                .ForMember(dest => dest.HabHoja1, opt => opt.Ignore())
+                .ForMember(dest => dest.HabHoja2, opt => opt.Ignore())
+                .ForMember(dest => dest.HabHoja3, opt => opt.Ignore())
                 .ForMember(dest => dest.CartaMenu, opt => opt.Ignore())
                 .ForMember(dest => dest.ManipulacionAlimentos, opt => opt.Ignore())
                 .AfterMap((dto, entity) =>

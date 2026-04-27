@@ -44,7 +44,9 @@ namespace rsFoodtrucks.DTOs
         public IFormFile DniFrente { get; set; }
         public IFormFile DniDorso { get; set; }
         public IFormFile FtFrente { get; set; }
-        public IFormFile Habilitacion { get; set; }
+        public IFormFile HabHoja1 { get; set; }
+        public IFormFile HabHoja2 { get; set; }
+        public IFormFile HabHoja3 { get; set; }
         public IFormFile ManipulacionAlimentos { get; set; }
         
     }
