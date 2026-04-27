@@ -11,3 +11,97 @@ obj
 /CodigoFuente/APIMdqDig/APIMdqDig/APIMdqDig/obj
 Debug
 foodtrucks_imagenes
+# =========================
+# .NET / Visual Studio
+# =========================
+
+bin/
+obj/
+out/
+*.exe
+*.dll
+*.pdb
+
+# Archivos de usuario
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Rider / VS Code / VS
+.vs/
+.idea/
+.vscode/
+
+# Logs
+*.log
+
+# Archivos temporales
+*.tmp
+*.temp
+
+# NuGet
+packages/
+*.nupkg
+.nuget/
+
+# Archivos de build
+*.cache
+*.dbmdl
+
+# IIS Express
+.vs/
+iisexpress/
+
+# Publicaciones
+publish/
+wwwroot/dist/
+
+# =========================
+# Node.js
+# =========================
+
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Builds frontend
+dist/
+build/
+.next/
+.nuxt/
+out/
+
+# Variables de entorno
+.env
+.env.*
+
+# Cache
+.cache/
+.parcel-cache/
+
+# =========================
+# Sistema operativo
+# =========================
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Mac
+.DS_Store
+
+# Linux
+*~
+
+# =========================
+# Otros
+# =========================
+
+coverage/
+*.coverage
+*.coveragexml
+TestResults/
